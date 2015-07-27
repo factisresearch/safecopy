@@ -132,6 +132,10 @@ class SafeCopy a where
     putCopy = contain . put
 #endif
 
+-- | A variant of the 'SafeCopy' class for types of kind @* -> *@.
+class SafeCopy' k where
+    safePut' :: SafeCopy a => k a -> Put
+    safeGet' :: SafeCopy a => Get (k a)
 
 -- constructGetterFromVersion :: SafeCopy a => Version a -> Kind (MigrateFrom (Reverse a)) -> Get (Get a)
 constructGetterFromVersion :: SafeCopy a => Version a -> Kind a -> Either String (Get a)

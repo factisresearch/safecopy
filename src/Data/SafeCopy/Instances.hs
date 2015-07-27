@@ -392,10 +392,6 @@ putGenericVector :: (SafeCopy a, VG.Vector v a) => v a -> Contained Put
 putGenericVector v = contain $ do put (VG.length v)
                                   getSafePut >>= VG.forM_ v
 
-instance SafeCopy a => SafeCopy (V.Vector a) where
-    getCopy = getGenericVector
-    putCopy = putGenericVector
-
 instance (SafeCopy a, VP.Prim a) => SafeCopy (VP.Vector a) where
     getCopy = getGenericVector
     putCopy = putGenericVector

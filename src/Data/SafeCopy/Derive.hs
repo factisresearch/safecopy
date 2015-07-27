@@ -234,9 +234,7 @@ forceTag _             = False
 
 tyVarName :: TyVarBndr -> Name
 tyVarName (PlainTV n) = n
-#if MIN_VERSION_template_haskell(2,10,0)
 tyVarName (KindedTV n _) = n
-#endif
 
 internalDeriveSafeCopy :: DeriveType -> Version a -> Name -> Name -> Q [Dec]
 internalDeriveSafeCopy deriveType versionId kindName tyName = do
@@ -263,11 +261,12 @@ internalDeriveSafeCopy deriveType versionId kindName tyName = do
     worker' tyBase context tyvars cons =
       let ty = foldl appT tyBase [ varT $ tyVarName var | var <- tyvars ]
 #if MIN_VERSION_template_haskell(2,10,0)
-          safeCopyClass args = foldl appT (conT ''SafeCopy) args
+          safeCopyClass args sfClass = foldl appT (conT sfClass) args
 #else
-          safeCopyClass args = classP ''SafeCopy args
+          safeCopyClass args sfClass = classP sfClass args
 #endif
-      in (:[]) <$> instanceD (cxt $ [safeCopyClass [varT $ tyVarName var] | var <- tyvars] ++ map return context)
+      in (:[]) <$> instanceD (cxt $ [safeCopyClass [varT $ tyVarName var] (toSafeCopyClass var) | var <- tyvars]
+                                    ++ map return context)
                                        (conT ''SafeCopy `appT` ty)
                                        [ mkPutCopy deriveType cons
                                        , mkGetCopy deriveType (show tyName) cons
@@ -275,6 +274,13 @@ internalDeriveSafeCopy deriveType versionId kindName tyName = do
                                        , valD (varP 'kind) (normalB (varE kindName)) []
                                        , funD 'errorTypeName [clause [wildP] (normalB $ litE $ StringL (show tyName)) []]
                                        ]
+
+toSafeCopyClass :: TyVarBndr -> Name
+toSafeCopyClass var =
+  case var of
+    (PlainTV _) -> ''SafeCopy
+    (KindedTV _ (AppT (AppT ArrowT StarT) StarT)) -> ''SafeCopy'
+    (KindedTV _ _) -> ''SafeCopy
 
 internalDeriveSafeCopyIndexedType :: DeriveType -> Version a -> Name -> Name -> [Name] -> Q [Dec]
 internalDeriveSafeCopyIndexedType deriveType versionId kindName tyName tyIndex' = do
