@@ -21,7 +21,9 @@
 --
 module Data.SafeCopy.SafeCopy where
 
-import Data.Serialize
+import Data.Binary
+import Data.Binary.Put (PutM)
+-- import Data.Serialize
 
 import Control.Monad
 import Data.Int (Int32)
@@ -125,10 +127,10 @@ class SafeCopy a where
     errorTypeName _ = "<unkown type>"
 
 #ifdef DEFAULT_SIGNATURES
-    default getCopy :: Serialize a => Contained (Get a)
+    default getCopy :: Binary a => Contained (Get a)
     getCopy = contain get
 
-    default putCopy :: Serialize a => a -> Contained Put
+    default putCopy :: Binary a => a -> Contained Put
     putCopy = contain . put
 #endif
 
@@ -263,7 +265,7 @@ instance Num (Version a) where
     signum (Version a) = Version (signum a)
     fromInteger i = Version (fromInteger i)
 
-instance Serialize (Version a) where
+instance Binary (Version a) where
     get = liftM Version get
     put = put . unVersion
 
