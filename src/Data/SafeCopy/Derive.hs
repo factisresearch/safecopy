@@ -15,7 +15,9 @@ module Data.SafeCopy.Derive
     , deriveSafeCopyHappstackDataIndexedType
     ) where
 
-import Data.Serialize (getWord8, putWord8, label)
+import Data.Binary (getWord8, putWord8)
+import Data.Binary.Get (label)
+-- import Data.Serialize (getWord8, putWord8, label)
 import Data.SafeCopy.SafeCopy
 
 #if MIN_VERSION_template_haskell(2,8,0)
