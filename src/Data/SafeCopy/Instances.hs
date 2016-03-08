@@ -5,11 +5,11 @@ module Data.SafeCopy.Instances where
 
 import Data.SafeCopy.SafeCopy
 
-import           Control.Applicative
 import           Control.Monad
 import qualified Data.Array as Array
 import qualified Data.Array.Unboxed as UArray
 import qualified Data.Array.IArray as IArray
+import           Data.Binary
 import qualified Data.ByteString.Lazy.Char8 as L
 import qualified Data.ByteString.Char8 as B
 import qualified Data.Foldable as Foldable
@@ -21,7 +21,7 @@ import           Data.Ix
 import qualified Data.Map as Map
 import           Data.Ratio (Ratio, (%), numerator, denominator)
 import qualified Data.Sequence as Sequence
-import           Data.Serialize
+-- import           Data.Serialize
 import qualified Data.Set as Set
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
@@ -37,10 +37,9 @@ import           Data.Typeable hiding (Proxy)
 #else
 import           Data.Typeable
 #endif
-import           Data.Word
 import           System.Time (ClockTime(..), TimeDiff(..), CalendarTime(..), Month(..))
 import qualified System.Time as OT
-import qualified Data.Vector as V
+-- import qualified Data.Vector as V
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Primitive as VP
 import qualified Data.Vector.Storable as VS
@@ -378,10 +377,10 @@ instance SafeCopy CalendarTime where
 typeName :: Typeable a => Proxy a -> String
 typeName proxy = show (typeOf (undefined `asProxyType` proxy))
 
-typeName1 :: (Typeable1 c) => Proxy (c a) -> String
+typeName1 :: (Typeable c) => Proxy (c a) -> String
 typeName1 proxy = show (typeOf1 (undefined `asProxyType` proxy))
 
-typeName2 :: (Typeable2 c) => Proxy (c a b) -> String
+typeName2 :: (Typeable c) => Proxy (c a b) -> String
 typeName2 proxy = show (typeOf2 (undefined `asProxyType` proxy))
 
 getGenericVector :: (SafeCopy a, VG.Vector v a) => Contained (Get (v a))
