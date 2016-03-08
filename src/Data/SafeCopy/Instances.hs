@@ -10,6 +10,7 @@ import           Control.Monad
 import qualified Data.Array as Array
 import qualified Data.Array.Unboxed as UArray
 import qualified Data.Array.IArray as IArray
+import           Data.Binary
 import qualified Data.ByteString.Lazy.Char8 as L
 import qualified Data.ByteString.Char8 as B
 import qualified Data.Foldable as Foldable
@@ -21,7 +22,7 @@ import           Data.Ix
 import qualified Data.Map as Map
 import           Data.Ratio (Ratio, (%), numerator, denominator)
 import qualified Data.Sequence as Sequence
-import           Data.Serialize
+-- import           Data.Serialize
 import qualified Data.Set as Set
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
