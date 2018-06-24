@@ -124,6 +124,22 @@ class SafeCopy a where
     errorTypeName :: Proxy a -> String
     errorTypeName _ = "<unknown type>"
 
+    -- | Parse a version tag and return the corresponding migrated parser. This is
+    -- useful when you can prove that multiple values have the same version.
+    -- See 'getSafePut'.
+    --
+    -- this function is in the typeclass to help with optimizations.
+    getSafeGet :: Get (Get a)
+    getSafeGet
+        = checkConsistency proxy $
+          case kindFromProxy proxy of
+            Primitive -> return $ unsafeUnPack getCopy
+            a_kind    -> do v <- get
+                            case constructGetterFromVersion v a_kind of
+                              Right getter -> return getter
+                              Left msg     -> fail msg
+        where proxy = Proxy :: Proxy a
+
 #ifdef DEFAULT_SIGNATURES
     default getCopy :: Serialize a => Contained (Get a)
     getCopy = contain get
@@ -133,6 +149,7 @@ class SafeCopy a where
 #endif
 
 
+{-# INLINE constructGetterFromVersion #-}
 -- constructGetterFromVersion :: SafeCopy a => Version a -> Kind (MigrateFrom (Reverse a)) -> Get (Get a)
 constructGetterFromVersion :: SafeCopy a => Version a -> Kind a -> Either String (Get a)
 constructGetterFromVersion diskVersion orig_kind =
@@ -179,19 +196,6 @@ safeGet :: SafeCopy a => Get a
 safeGet
     = join getSafeGet
 
--- | Parse a version tag and return the corresponding migrated parser. This is
---   useful when you can prove that multiple values have the same version.
---   See 'getSafePut'.
-getSafeGet :: forall a. SafeCopy a => Get (Get a)
-getSafeGet
-    = checkConsistency proxy $
-      case kindFromProxy proxy of
-        Primitive -> return $ unsafeUnPack getCopy
-        a_kind    -> do v <- get
-                        case constructGetterFromVersion v a_kind of
-                          Right getter -> return getter
-                          Left msg     -> fail msg
-    where proxy = Proxy :: Proxy a
 
 -- | Serialize a data type by first writing out its version tag. This is much
 --   simpler than the corresponding 'safeGet' since previous versions don't
